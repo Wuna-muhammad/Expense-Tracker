@@ -3,16 +3,16 @@ const add = document.getElementById('add'),
   amount = document.getElementById('amount'),
   expense = document.getElementById('expense'),
   income = document.getElementById('income'),
-  listings = document.getElementById('listings')
-balance = document.getElementById('balance');
+  listItem = document.getElementById('list_item'),
+  balance = document.getElementById('balance');
 
-listings.addEventListener('click', deleteExpense);
+listItem.addEventListener('click', deleteExpense);
 
 //load expenses from local storage
 window.onload = function () {
   let expenses;
   if (localStorage.getItem('expenses') === null) {
-    listings.style.display = 'none';
+    listItem.style.display = 'none';
     expenses = [];
     localStorage.setItem('expenses', JSON.stringify(expenses));
   } else {
@@ -28,7 +28,6 @@ window.onload = function () {
         list_rendering(expense[0], expense[1], 'in')
       }
     });
-
     expenseBreakdown(inc, exp)
   }
 }
@@ -40,6 +39,7 @@ function expenseBreakdown(inc, exp) {
   } else if (exp.length == 0) {
     exp = [0];
   }
+
   i = inc.reduce(reducer)
   e = exp.reduce(reducer)
 
@@ -71,7 +71,7 @@ add.addEventListener('click', (e) => {
   e.preventDefault();
 })
 
-function showError(element, element1 = listings) {
+function showError(element, element1 = listItem) {
   element.className += ' is-invalid';
   element1.className += ' is-invalid';
   setTimeout(() => {
@@ -98,7 +98,7 @@ function saveExpense(desc, amt) {
 }
 
 function list_rendering(desc, amt, clas) {
-  listings.innerHTML += `
+  listItem.innerHTML += `
   <li class="list-group-item border-right-${clas} mr-3 ml-3">
   <span>${desc}</span>
   <i id="push_i" class="fa fa-close"></i>
@@ -115,7 +115,7 @@ function deleteExpense(e) {
 
       expenses = JSON.parse(localStorage.getItem("expenses"));
       expenses.forEach((expense, index) => {
-        if (del == expense[0] ) {
+        if (del == expense[0]) {
           console.log("yes")
           expenses.splice(index, 1);
         }
