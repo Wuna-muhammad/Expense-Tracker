@@ -20,12 +20,12 @@ window.onload = function () {
     let inc = [];
     let exp = [];
     expenses.forEach(expense => {
-      if (Number(expense[1]) < 0) {
-        exp.push(Number(expense[1]))
-        list_rendering(expense[0], expense[1], 'ex')
+      if (Number(expense[2]) < 0) {
+        exp.push(Number(expense[2]))
+        list_rendering(expense[0], expense[1], expense[2], 'ex')
       } else {
-        inc.push(Number(expense[1]))
-        list_rendering(expense[0], expense[1], 'in')
+        inc.push(Number(expense[2]))
+        list_rendering(expense[0], expense[1], expense[2], 'in')
       }
     });
     expenseBreakdown(inc, exp)
@@ -58,6 +58,7 @@ function formatMoney(money) {
   return '$' + money.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
 
+//validation
 add.addEventListener('click', (e) => {
   if (amount.value == '' && description.value == '') {
     showError(amount, description)
@@ -81,32 +82,35 @@ function showError(element, element1 = listItem) {
 }
 
 function logExpense() {
+  time = Date.now();
   if (amount.value < 0) {
-    list_rendering(description.value, amount.value, 'ex')
-    saveExpense(description.value, amount.value)
+    list_rendering(time, description.value, amount.value, 'ex')
+    saveExpense(time, description.value, amount.value)
   } else {
-    list_rendering(description.value, amount.value, 'in')
-    saveExpense(description.value, amount.value)
+    list_rendering(time, description.value, amount.value, 'in')
+    saveExpense(time, description.value, amount.value)
   }
 }
 
-function saveExpense(desc, amt) {
+function saveExpense(time, desc, amt) {
   expenses = JSON.parse(localStorage.getItem("expenses"));
-  expenses.push([desc, Number(amt)])
+  expenses.push([time, desc, Number(amt)])
   localStorage.setItem('expenses', JSON.stringify(expenses));
   location.reload()
 }
 
-function list_rendering(desc, amt, clas) {
+function list_rendering(time, desc, amt, clas) {
   listItem.innerHTML += `
   <li class="list-group-item border-right-${clas} mr-3 ml-3">
-  <span>${desc}</span>
-  <i id="push_i" class="fa fa-close"></i>
-  <span>${formatMoney(Number(amt))}</span></li>`
+  <i class="fa fa-close"></i>
+
+  <span class="text-capitalize">${desc}</span>
+  <div class="row text-right">
+  <span class="col-12">${formatMoney(Number(amt))}</span>
+  <span class="col-12 font-weight-light" style="font-size:small">${elapsedTime(time)}</span></div></li>`
 }
 
 function deleteExpense(e) {
-  console.log('deleted')
   let target = e.target;
   if (target.className == 'fa fa-close') {
     if (confirm('Are u sure')) {
@@ -123,5 +127,34 @@ function deleteExpense(e) {
       localStorage.setItem('expenses', JSON.stringify(expenses));
       location.reload();
     }
+  }
+}
+
+function elapsedTime(time) {
+  currentTime = Date.now();
+  elapsed = currentTime - time;
+
+  seconds = elapsed / 1000 //seconds
+  minutes = elapsed / 60000 //minutes
+  hours = elapsed/ 3.6e+6 //hours
+  days = elapsed / 8.64e+7 //days
+  weeks = elapsed/ 6.048e+8 //weeks
+  months = elapsed/ 2.628e+9 //months
+  years = elapsed / 3.154e+10 //months
+
+  if (minutes < 1) {
+    return Math.floor(seconds) + ' seconds ago'
+  } else if (hours < 1) {
+    return Math.floor(minutes) + ' minutes ago'
+  } else if (hours > 1 && days < 1) {
+    return Math.floor(hours) + ' hours ago'
+  } else if (days > 1 && days < 7) {
+    return Math.floor(days) + ' days'
+  } else if (days > 7 && weeks < 4) {
+    return Math.floor(weeks) + ' weeks ago'
+  } else if (weeks > 4 && months < 12) {
+    return Math.floor(months) + ' months ago'
+  } else if (months > 12) {
+    return Math.floor(years) + ' years ago'
   }
 }
